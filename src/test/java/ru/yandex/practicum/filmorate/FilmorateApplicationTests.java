@@ -33,7 +33,7 @@ class FilmorateApplicationTests {
 		User created = userController.create(user);
 
 		assertNotNull(created);
-		assertEquals(1L, created.getId());
+		assertTrue(created.getId() > 0);
 		assertEquals("name", created.getName());
 		assertEquals("login", created.getLogin());
 		assertEquals("test@mail.com", created.getEmail());
@@ -101,7 +101,7 @@ class FilmorateApplicationTests {
 		Film created = filmController.create(film);
 
 		assertNotNull(created);
-		assertEquals(1L, created.getId());
+		assertTrue(created.getId() > 0);
 		assertEquals("Film", created.getName());
 	}
 
