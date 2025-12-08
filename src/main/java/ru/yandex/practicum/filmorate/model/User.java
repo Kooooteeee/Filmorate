@@ -12,9 +12,9 @@ import lombok.ToString;
 @Setter
 @ToString
 public class User {
-    long id;
-    String email;
-    String login;
-    String name;
-    LocalDate birthday;
+    private Long id;
+    private String email;
+    private String login;
+    private String name;
+    private LocalDate birthday;
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
@@ -16,18 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class FilmorateApplicationTests {
 
+	@Autowired
 	private UserController userController;
+
+	@Autowired
 	private FilmController filmController;
-
-	@BeforeEach
-	void setUp() {
-		userController = new UserController();
-		filmController = new FilmController();
-	}
-
-	@Test
-	void contextLoads() {
-	}
 
 	@Test
 	void shouldCreateValidUser() {

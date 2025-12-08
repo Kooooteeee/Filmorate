@@ -12,9 +12,9 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Film {
-    long id;
-    String name;
-    String description;
-    LocalDate releaseDate;
-    Integer duration;
+    private Long id;
+    private String name;
+    private String description;
+    private LocalDate releaseDate;
+    private Integer duration;
 }

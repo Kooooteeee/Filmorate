@@ -30,19 +30,19 @@ public class UserController {
     public User create(@RequestBody User user) {
         log.info("Получен запрос POST /users");
         if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.warn("Ошибка валидации email: {}", user.getEmail());
+            log.error("Ошибка валидации email: {}", user.getEmail());
             throw new ValidationException("Некорректная почта.");
         }
         if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.warn("Ошибка валидации login: {}", user.getLogin());
+            log.error("Ошибка валидации login: {}", user.getLogin());
             throw new ValidationException("Некорректный логин.");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-            log.info("Имя не задано, подставлем login: {}", user.getName());
+            log.error("Имя не задано, подставлем login: {}", user.getName());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Ошибка валидации birthday: {}", user.getBirthday());
+            log.error("Ошибка валидации birthday: {}", user.getBirthday());
             throw new ValidationException("Некорректная дата рождения.");
         }
 
@@ -68,7 +68,7 @@ public class UserController {
         User oldUser = users.get(newUser.getId());
 
         if (oldUser == null) {
-            log.warn("Попытка обновить несуществующего пользователя id={}", newUser.getId());
+            log.error("Попытка обновить несуществующего пользователя id={}", newUser.getId());
             throw new ValidationException("Пользователь не найден.");
         }
 

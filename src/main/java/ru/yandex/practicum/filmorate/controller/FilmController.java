@@ -28,19 +28,19 @@ public class FilmController {
     public Film create(@RequestBody Film film) {
         log.info("Получен запрос POST /films");
             if (film.getName() == null || film.getName().isBlank()) {
-                log.warn("Ошибка валидации name: {}", film.getName());
+                log.error("Ошибка валидации name: {}", film.getName());
                 throw new ValidationException("Пустое название.");
             }
             if (film.getDescription().length() > 200) {
-                log.warn("Ошибка валидации description: {}", film.getDescription());
+                log.error("Ошибка валидации description: {}", film.getDescription());
                 throw new ValidationException("Описание должно быть короче 200 символов.");
             }
             if (film.getReleaseDate().isBefore(LocalDate.of(1895,12,28))) {
-                log.warn("Ошибка валидации releaseDate: {}", film.getReleaseDate());
+                log.error("Ошибка валидации releaseDate: {}", film.getReleaseDate());
                 throw new ValidationException("Некорректная дата.");
             }
             if (film.getDuration() <= 0) {
-                log.warn("Ошибка валидации duration: {}", film.getDuration());
+                log.error("Ошибка валидации duration: {}", film.getDuration());
                 throw new ValidationException("некорректная продолжительность.");
             }
 
@@ -66,7 +66,7 @@ public class FilmController {
         Film oldFilm = films.get(newFilm.getId());
 
         if (oldFilm == null) {
-            log.warn("Попытка обновить несуществующий фильм id={}", newFilm.getId());
+            log.error("Попытка обновить несуществующий фильм id={}", newFilm.getId());
             throw new ValidationException("Фильм не найден.");
         }
 
