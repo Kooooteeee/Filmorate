@@ -13,6 +13,7 @@ import java.util.Map;
 import org.springframework.web.bind.annotation.RestController;
 
 import ru.yandex.practicum.filmorate.model.User;
+
 @Slf4j
 @RestController
 @RequestMapping("/users")
