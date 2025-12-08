@@ -48,7 +48,6 @@ public class FilmController {
 
             films.put(film.getId(), film);
             log.info("Фильм создан: {}", film);
-            
             return film;
     }
 
