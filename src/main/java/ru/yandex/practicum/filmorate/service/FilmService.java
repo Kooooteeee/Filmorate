@@ -53,7 +53,7 @@ public class FilmService {
 
         Film film = filmStorage.findById(id);
 
-        if(!film.getLikesUsersId().contains(userId)) {
+        if (!film.getLikesUsersId().contains(userId)) {
             log.error("Пользователь {} не найден в списке поставивших лайк.", userStorage.findById(userId));
             throw new NotFoundException("Такой пользователь не ставил лайк этому фильму.");
         }
