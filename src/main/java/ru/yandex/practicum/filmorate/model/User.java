@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -17,4 +19,13 @@ public class User {
     private String login;
     private String name;
     private LocalDate birthday;
+    private Set<Long> friendsId = new HashSet<>();
+
+    public void addFriend(long id) {
+        friendsId.add(id);
+    }
+
+    public void removeFriend(long id) {
+        friendsId.remove(id);
+    }
 }

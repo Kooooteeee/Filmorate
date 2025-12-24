@@ -1,82 +1,67 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
-
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.web.bind.annotation.RestController;
 
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserStorage userStorage;
+    private final UserService userService;
+
+    @Autowired
+    public UserController (UserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
+    }
 
     @GetMapping
     public Collection<User> findAll() {
-        log.info("Получен запрос GET /users");
-        return users.values();
+        return userStorage.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable long id) {
+        return userStorage.findById(id);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> getUsersFriend(@PathVariable long id) {
+        return userService.getUserFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 
     @PostMapping
     public User create(@RequestBody User user) {
-        log.info("Получен запрос POST /users");
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.error("Ошибка валидации email: {}", user.getEmail());
-            throw new ValidationException("Некорректная почта.");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.error("Ошибка валидации login: {}", user.getLogin());
-            throw new ValidationException("Некорректный логин.");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.error("Имя не задано, подставлем login: {}", user.getName());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Ошибка валидации birthday: {}", user.getBirthday());
-            throw new ValidationException("Некорректная дата рождения.");
-        }
-
-        user.setId(getNextId());
-
-        users.put(user.getId(), user);
-        log.info("Пользователь создан: {}", user);
-        return user;
-    }
-
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+        return userStorage.create(user);
     }
 
     @PutMapping
     public User update(@RequestBody User newUser) {
-        log.info("Получен запрос PUT /users");
-        User oldUser = users.get(newUser.getId());
+        return userStorage.update(newUser);
+    }
 
-        if (oldUser == null) {
-            log.error("Попытка обновить несуществующего пользователя id={}", newUser.getId());
-            throw new ValidationException("Пользователь не найден.");
-        }
+    @PutMapping("/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable long id, @PathVariable long friendId) {
+        return userService.addFriend(id, friendId);
+    }
 
-        if (newUser.getLogin() != null) oldUser.setLogin(newUser.getLogin());
-        if (newUser.getName() != null) oldUser.setName(newUser.getName());
-        if (newUser.getBirthday() != null) oldUser.setBirthday(newUser.getBirthday());
-        if (newUser.getEmail() != null) oldUser.setEmail(newUser.getEmail());
-        log.info("Пользователь обновлен: {}", oldUser);
-        return oldUser;
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User removeFriend(@PathVariable long id, @PathVariable long friendId) {
+        return userService.removeFriend(id, friendId);
     }
 }
