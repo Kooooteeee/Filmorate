@@ -20,17 +20,17 @@ public class Film {
     private LocalDate releaseDate;
     private Integer duration;
     private Set<Long> likesUsersId = new HashSet<>();
-    private int count = 0;
 
     public void putLike(long id) {
-        if (likesUsersId.add(id)) {
-            count++;
-        }
+        likesUsersId.add(id);
+
     }
 
     public void deleteLike(long id) {
-        if (likesUsersId.remove(id)) {
-            count--;
-        }
+        likesUsersId.remove(id);
+    }
+
+    public int getCount() {
+        return likesUsersId.size();
     }
 }

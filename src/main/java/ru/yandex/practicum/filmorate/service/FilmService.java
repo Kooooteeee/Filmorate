@@ -29,14 +29,14 @@ public class FilmService {
 
     public Film putLike(long id, long userId) {
         log.info("Получен запрос PUT /films/{id}/like/{userId}");
-        if (filmStorage.findById(id) == null || userStorage.findById(userId) == null) {
-            log.error("Фильм {} или/и пользователь {} не найдены",
-                    filmStorage.findById(id),userStorage.findById(userId));
-            throw new NotFoundException("Не найден фильм или пользовтаель.");
-        }
 
         Film film = filmStorage.findById(id);
         User user = userStorage.findById(userId);
+        if (film == null || user == null) {
+            log.error("Фильм c id {} или/и пользователь c id {} не найдены",
+                    id, userId);
+            throw new NotFoundException("Не найден фильм или пользовтаель.");
+        }
 
         film.putLike(userId);
         log.info("Лайк пользователя {} добавлен фильму {}.", user, film);
@@ -45,21 +45,21 @@ public class FilmService {
 
     public Film deleteLike(long id, long userId) {
         log.info("Получен запрос DELETE /films/{id}/like/{userId}");
-        if (filmStorage.findById(id) == null || userStorage.findById(userId) == null) {
-            log.error("Фильм {} или/и пользователь {} не найдены",
-                    filmStorage.findById(id),userStorage.findById(userId));
+        Film film = filmStorage.findById(id);
+        User user = userStorage.findById(userId);
+        if (film == null || user == null) {
+            log.error("Фильм c id {} или/и пользователь c id {} не найдены",
+                    id, userId);
             throw new NotFoundException("Не найден фильм или пользователь.");
         }
 
-        Film film = filmStorage.findById(id);
-
         if (!film.getLikesUsersId().contains(userId)) {
-            log.error("Пользователь {} не найден в списке поставивших лайк.", userStorage.findById(userId));
+            log.error("Пользователь {} не найден в списке поставивших лайк.", user);
             throw new NotFoundException("Такой пользователь не ставил лайк этому фильму.");
         }
 
         film.deleteLike(userId);
-        log.info("Лайк пользователя {} удален у фильма {}.", userStorage.findById(userId), film);
+        log.info("Лайк пользователя {} удален у фильма {}.", user, film);
         return film;
     }
 
@@ -72,9 +72,11 @@ public class FilmService {
         }
 
         int spCount = count;
+        int size = filmStorage.findAll().size();
 
-        if (count > filmStorage.findAll().size()) {
-            spCount = filmStorage.findAll().size();
+
+        if (count > size) {
+            spCount = size;
         }
 
         List<Film> top = filmStorage.findAll().stream()
