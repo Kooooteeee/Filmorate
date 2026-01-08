@@ -20,10 +20,19 @@ public class Film {
     private LocalDate releaseDate;
     private Integer duration;
     private Set<Long> likesUsersId = new HashSet<>();
+    private Set<String> genres = new HashSet<>();
+    private String MPA;
+
+    public void putGenre(String genre) {
+        genres.add(genre);
+    }
+
+    public void deleteGenre(String genre) {
+        genres.remove(genre);
+    }
 
     public void putLike(long id) {
         likesUsersId.add(id);
-
     }
 
     public void deleteLike(long id) {
