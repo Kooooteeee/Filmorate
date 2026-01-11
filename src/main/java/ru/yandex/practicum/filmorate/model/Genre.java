@@ -7,7 +7,8 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@EqualsAndHashCode(of = "id") @ToString
+@EqualsAndHashCode(of = "id")
+@ToString
 public class Genre {
     private Integer id;
     private String name;
