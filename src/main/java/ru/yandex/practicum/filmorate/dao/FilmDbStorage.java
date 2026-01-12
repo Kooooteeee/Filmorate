@@ -107,7 +107,7 @@ public class FilmDbStorage implements FilmStorage {
                 ORDER BY g.id
                 """;
 
-    private static final String DELETE_SQL= "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
+    private static final String DELETE_SQL = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
 
     private final JdbcTemplate jdbcTemplate;
 
