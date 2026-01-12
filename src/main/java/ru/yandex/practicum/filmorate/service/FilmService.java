@@ -1,18 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -21,70 +17,39 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
 
-    public Film putLike(long id, long userId) {
-        log.info("Получен запрос PUT /films/{id}/like/{userId}");
+    public Film putLike(long filmId, long userId) {
+        log.info("PUT /films/{}/like/{}", filmId, userId);
 
-        Film film = filmStorage.findById(id);
-        User user = userStorage.findById(userId);
-        if (film == null || user == null) {
-            log.error("Фильм c id {} или/и пользователь c id {} не найдены",
-                    id, userId);
-            throw new NotFoundException("Не найден фильм или пользовтаель.");
-        }
+        filmStorage.findById(filmId);
+        userStorage.findById(userId);
 
-        film.putLike(userId);
-        log.info("Лайк пользователя {} добавлен фильму {}.", user, film);
-        return film;
+        filmStorage.addLike(filmId, userId);
+        return filmStorage.findById(filmId);
     }
 
-    public Film deleteLike(long id, long userId) {
-        log.info("Получен запрос DELETE /films/{id}/like/{userId}");
-        Film film = filmStorage.findById(id);
-        User user = userStorage.findById(userId);
-        if (film == null || user == null) {
-            log.error("Фильм c id {} или/и пользователь c id {} не найдены",
-                    id, userId);
-            throw new NotFoundException("Не найден фильм или пользователь.");
-        }
+    public Film deleteLike(long filmId, long userId) {
+        log.info("DELETE /films/{}/like/{}", filmId, userId);
 
-        if (!film.getLikesUsersId().contains(userId)) {
-            log.error("Пользователь {} не найден в списке поставивших лайк.", user);
-            throw new NotFoundException("Такой пользователь не ставил лайк этому фильму.");
-        }
+        filmStorage.findById(filmId);
+        userStorage.findById(userId);
 
-        film.deleteLike(userId);
-        log.info("Лайк пользователя {} удален у фильма {}.", user, film);
-        return film;
+        filmStorage.deleteLike(filmId, userId);
+        return filmStorage.findById(filmId);
     }
 
     public Collection<Film> getPopular(int count) {
-        log.info("Получен запрос GET /films/popular?count={count}");
+        log.info("GET /films/popular?count={}", count);
 
         if (count < 1) {
-            log.error("Некорректный параметр count={}.", count);
             throw new ValidationException("Параметр count должен быть >= 1.");
         }
 
-        int spCount = count;
-        int size = filmStorage.findAll().size();
-
-
-        if (count > size) {
-            spCount = size;
-        }
-
-        List<Film> top = filmStorage.findAll().stream()
-                .sorted(Comparator.comparingInt(Film::getCount).reversed())
-                .limit(spCount)
-                .toList();
-
-        log.info("Получен список самых популярных фильмов {}.", top);
-        return top;
+        return filmStorage.findPopular(count);
     }
 }

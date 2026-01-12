@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+/*+package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
@@ -87,4 +87,4 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .orElse(0);
         return ++currentMaxId;
     }
-}
+}*/
