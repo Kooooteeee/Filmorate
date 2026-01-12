@@ -18,6 +18,10 @@ public class MpaController {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final static String FIND_ALL_SQL = "SELECT id, name FROM mpa ORDER BY id";
+
+    private final static String FIND_BY_SQL = "SELECT id, name FROM mpa WHERE id = ?";
+
     private static final RowMapper<Mpa> MPA_MAPPER = (rs, rowNum) -> {
         Mpa m = new Mpa();
         m.setId(rs.getInt("id"));
@@ -28,16 +32,14 @@ public class MpaController {
     @GetMapping
     public List<Mpa> findAll() {
         log.info("GET /mpa");
-        String sql = "SELECT id, name FROM mpa ORDER BY id";
-        return jdbcTemplate.query(sql, MPA_MAPPER);
+        return jdbcTemplate.query(FIND_ALL_SQL, MPA_MAPPER);
     }
 
     @GetMapping("/{id}")
     public Mpa findById(@PathVariable int id) {
         log.info("GET /mpa/{}", id);
-        String sql = "SELECT id, name FROM mpa WHERE id = ?";
 
-        List<Mpa> found = jdbcTemplate.query(sql, MPA_MAPPER, id);
+        List<Mpa> found = jdbcTemplate.query(FIND_BY_SQL, MPA_MAPPER, id);
         if (found.isEmpty()) {
             throw new NotFoundException("MPA рейтинг не найден.");
         }

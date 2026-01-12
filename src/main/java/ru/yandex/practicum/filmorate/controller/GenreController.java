@@ -16,6 +16,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenreController {
 
+    private final static String FIND_ALL_SQL = "SELECT id, name FROM genres ORDER BY id";
+
+    private final static String FIND_BY_SQL = "SELECT id, name FROM genres WHERE id = ?";
+
     private final JdbcTemplate jdbcTemplate;
 
     private static final RowMapper<Genre> GENRE_MAPPER = (rs, rowNum) -> {
@@ -28,16 +32,14 @@ public class GenreController {
     @GetMapping
     public List<Genre> findAll() {
         log.info("GET /genres");
-        String sql = "SELECT id, name FROM genres ORDER BY id";
-        return jdbcTemplate.query(sql, GENRE_MAPPER);
+        return jdbcTemplate.query(FIND_ALL_SQL, GENRE_MAPPER);
     }
 
     @GetMapping("/{id}")
     public Genre findById(@PathVariable int id) {
         log.info("GET /genres/{}", id);
-        String sql = "SELECT id, name FROM genres WHERE id = ?";
 
-        List<Genre> found = jdbcTemplate.query(sql, GENRE_MAPPER, id);
+        List<Genre> found = jdbcTemplate.query(FIND_BY_SQL, GENRE_MAPPER, id);
         if (found.isEmpty()) {
             throw new NotFoundException("Жанр не найден.");
         }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.LinkedHashSet;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +21,7 @@ public class Film {
     private Integer duration;
 
     private Mpa mpa;
-    private Set<Genre> genres = new java.util.LinkedHashSet<>();
+    private Set<Genre> genres = new LinkedHashSet<>();
 
 
     private Integer likeCount;

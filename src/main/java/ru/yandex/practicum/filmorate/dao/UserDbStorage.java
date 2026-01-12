@@ -16,10 +16,50 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Collection;
+import java.sql.Types;
 
 @Component("userDbStorage")
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
+
+    private final static String FIND_ALL_SQL = "SELECT id, email, login, name, birthday FROM users ORDER BY id";
+
+    private final static String CREATE_SQL = "INSERT INTO users(email, login, name, birthday) VALUES (?, ?, ?, ?)";
+
+    private final static String UPDATE_SQL = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
+
+    private final static String FIND_SQL = "SELECT id, email, login, name, birthday FROM users WHERE id = ?";
+
+    private final static String FIND_FRIENDS_SQL = """
+                SELECT u.id, u.email, u.login, u.name, u.birthday
+                FROM friendships f
+                JOIN users u ON u.id = f.friend_id
+                WHERE f.user_id = ?
+                ORDER BY u.id
+                """;
+
+    private final  static String MERGE_SQL = """
+                MERGE INTO friendships (user_id, friend_id, status)
+                KEY (user_id, friend_id)
+                VALUES (?, ?, 'UNCONFIRMED')
+                """;
+
+    private final static String CONFIRM_BOTH_SQL = """
+                    UPDATE friendships
+                    SET status = 'CONFIRMED'
+                    WHERE (user_id = ? AND friend_id = ?)
+                       OR (user_id = ? AND friend_id = ?)
+                    """;
+
+    private final static String FIND_COMMON_FRIENDS_SQL = """
+                SELECT u.id, u.email, u.login, u.name, u.birthday
+                FROM users u
+                JOIN friendships f1 ON f1.friend_id = u.id
+                JOIN friendships f2 ON f2.friend_id = u.id
+                WHERE f1.user_id = ?
+                  AND f2.user_id = ?
+                ORDER BY u.id
+                """;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -36,14 +76,11 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> findAll() {
-        String sql = "SELECT id, email, login, name, birthday FROM users ORDER BY id";
-        return jdbcTemplate.query(sql, USER_MAPPER);
+        return jdbcTemplate.query(FIND_ALL_SQL, USER_MAPPER);
     }
 
     @Override
     public User create(User user) {
-        String sql = "INSERT INTO users(email, login, name, birthday) VALUES (?, ?, ?, ?)";
-
         if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             throw new ValidationException("Некорректный email.");
         }
@@ -60,28 +97,27 @@ public class UserDbStorage implements UserStorage {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getLogin());
             ps.setString(3, user.getName());
             if (user.getBirthday() == null) {
-                ps.setNull(4, java.sql.Types.DATE);
+                ps.setNull(4, Types.DATE);
             } else {
                 ps.setDate(4, Date.valueOf(user.getBirthday()));
             }
             return ps;
         }, keyHolder);
 
-        Long id = keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
+        Long id = keyHolder.getKey().longValue();
         user.setId(id);
         return user;
     }
 
     @Override
     public User update(User newUser) {
-        String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
 
-        int updated = jdbcTemplate.update(sql,
+        int updated = jdbcTemplate.update(UPDATE_SQL,
                 newUser.getEmail(),
                 newUser.getLogin(),
                 newUser.getName(),
@@ -98,9 +134,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User findById(long id) {
-        String sql = "SELECT id, email, login, name, birthday FROM users WHERE id = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, USER_MAPPER, id);
+            return jdbcTemplate.queryForObject(FIND_SQL, USER_MAPPER, id);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Пользователь не найден.");
         }
@@ -108,12 +143,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(long userId, long friendId) {
-        String merge = """
-                MERGE INTO friendships (user_id, friend_id, status)
-                KEY (user_id, friend_id)
-                VALUES (?, ?, 'UNCONFIRMED')
-                """;
-        jdbcTemplate.update(merge, userId, friendId);
+        jdbcTemplate.update(MERGE_SQL, userId, friendId);
 
         Integer reverseCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM friendships WHERE user_id = ? AND friend_id = ?",
@@ -122,13 +152,7 @@ public class UserDbStorage implements UserStorage {
         );
 
         if (reverseCount != null && reverseCount > 0) {
-            String confirmBoth = """
-                    UPDATE friendships
-                    SET status = 'CONFIRMED'
-                    WHERE (user_id = ? AND friend_id = ?)
-                       OR (user_id = ? AND friend_id = ?)
-                    """;
-            jdbcTemplate.update(confirmBoth, userId, friendId, friendId, userId);
+            jdbcTemplate.update(CONFIRM_BOTH_SQL, userId, friendId, friendId, userId);
         }
     }
 
@@ -152,27 +176,11 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> findFriends(long userId) {
-        String sql = """
-                SELECT u.id, u.email, u.login, u.name, u.birthday
-                FROM friendships f
-                JOIN users u ON u.id = f.friend_id
-                WHERE f.user_id = ?
-                ORDER BY u.id
-                """;
-        return jdbcTemplate.query(sql, USER_MAPPER, userId);
+        return jdbcTemplate.query(FIND_FRIENDS_SQL, USER_MAPPER, userId);
     }
 
     @Override
     public Collection<User> findCommonFriends(long userId, long otherId) {
-        String sql = """
-                SELECT u.id, u.email, u.login, u.name, u.birthday
-                FROM users u
-                JOIN friendships f1 ON f1.friend_id = u.id
-                JOIN friendships f2 ON f2.friend_id = u.id
-                WHERE f1.user_id = ?
-                  AND f2.user_id = ?
-                ORDER BY u.id
-                """;
-        return jdbcTemplate.query(sql, USER_MAPPER, userId, otherId);
+        return jdbcTemplate.query(FIND_COMMON_FRIENDS_SQL, USER_MAPPER, userId, otherId);
     }
 }
