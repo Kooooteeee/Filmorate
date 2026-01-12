@@ -22,15 +22,15 @@ import java.sql.Types;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
-    private final static String FIND_ALL_SQL = "SELECT id, email, login, name, birthday FROM users ORDER BY id";
+    private static final String FIND_ALL_SQL = "SELECT id, email, login, name, birthday FROM users ORDER BY id";
 
-    private final static String CREATE_SQL = "INSERT INTO users(email, login, name, birthday) VALUES (?, ?, ?, ?)";
+    private static final String CREATE_SQL = "INSERT INTO users(email, login, name, birthday) VALUES (?, ?, ?, ?)";
 
-    private final static String UPDATE_SQL = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
+    private static final String UPDATE_SQL = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
 
-    private final static String FIND_SQL = "SELECT id, email, login, name, birthday FROM users WHERE id = ?";
+    private static final String FIND_SQL = "SELECT id, email, login, name, birthday FROM users WHERE id = ?";
 
-    private final static String FIND_FRIENDS_SQL = """
+    private static final String FIND_FRIENDS_SQL = """
                 SELECT u.id, u.email, u.login, u.name, u.birthday
                 FROM friendships f
                 JOIN users u ON u.id = f.friend_id
@@ -38,20 +38,20 @@ public class UserDbStorage implements UserStorage {
                 ORDER BY u.id
                 """;
 
-    private final  static String MERGE_SQL = """
+    private static final String MERGE_SQL = """
                 MERGE INTO friendships (user_id, friend_id, status)
                 KEY (user_id, friend_id)
                 VALUES (?, ?, 'UNCONFIRMED')
                 """;
 
-    private final static String CONFIRM_BOTH_SQL = """
+    private static final String CONFIRM_BOTH_SQL = """
                     UPDATE friendships
                     SET status = 'CONFIRMED'
                     WHERE (user_id = ? AND friend_id = ?)
                        OR (user_id = ? AND friend_id = ?)
                     """;
 
-    private final static String FIND_COMMON_FRIENDS_SQL = """
+    private static final String FIND_COMMON_FRIENDS_SQL = """
                 SELECT u.id, u.email, u.login, u.name, u.birthday
                 FROM users u
                 JOIN friendships f1 ON f1.friend_id = u.id

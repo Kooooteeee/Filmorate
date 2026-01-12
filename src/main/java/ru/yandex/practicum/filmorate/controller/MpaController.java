@@ -18,9 +18,9 @@ public class MpaController {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final static String FIND_ALL_SQL = "SELECT id, name FROM mpa ORDER BY id";
+    private static final String FIND_ALL_SQL = "SELECT id, name FROM mpa ORDER BY id";
 
-    private final static String FIND_BY_SQL = "SELECT id, name FROM mpa WHERE id = ?";
+    private static final String FIND_BY_SQL = "SELECT id, name FROM mpa WHERE id = ?";
 
     private static final RowMapper<Mpa> MPA_MAPPER = (rs, rowNum) -> {
         Mpa m = new Mpa();

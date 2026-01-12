@@ -16,9 +16,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenreController {
 
-    private final static String FIND_ALL_SQL = "SELECT id, name FROM genres ORDER BY id";
+    private static final String FIND_ALL_SQL = "SELECT id, name FROM genres ORDER BY id";
 
-    private final static String FIND_BY_SQL = "SELECT id, name FROM genres WHERE id = ?";
+    private static final String FIND_BY_SQL = "SELECT id, name FROM genres WHERE id = ?";
 
     private final JdbcTemplate jdbcTemplate;
 

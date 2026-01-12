@@ -24,7 +24,7 @@ import java.sql.ResultSet;
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
-    private final static String FIND_ALL_SQL = """
+    private static final String FIND_ALL_SQL = """
                 SELECT
                     f.id,
                     f.name,
@@ -43,7 +43,7 @@ public class FilmDbStorage implements FilmStorage {
                 ORDER BY f.id
                 """;
 
-    private final static String FIND_BY_SQL = """
+    private static final String FIND_BY_SQL = """
                 SELECT
                     f.id,
                     f.name,
@@ -62,24 +62,24 @@ public class FilmDbStorage implements FilmStorage {
                     m.id, m.name
                 """;
 
-    private final static String CREATE_SQL = """
+    private static final String CREATE_SQL = """
                 INSERT INTO films (name, description, release_date, duration, mpa_id)
                 VALUES (?, ?, ?, ?, ?)
                 """;
 
-    private final static String UPDATE_SQL = """
+    private static final String UPDATE_SQL = """
                 UPDATE films
                 SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ?
                 WHERE id = ?
                 """;
 
-    private final static String ADD_LIKE_SQL = """
+    private static final String ADD_LIKE_SQL = """
                 MERGE INTO film_likes (film_id, user_id)
                 KEY (film_id, user_id)
                 VALUES (?, ?)
                 """;
 
-    private final static String FIND_POP_SQL = """
+    private static final String FIND_POP_SQL = """
                 SELECT
                     f.id,
                     f.name,
@@ -99,7 +99,7 @@ public class FilmDbStorage implements FilmStorage {
                 LIMIT ?
                 """;
 
-    private final static String LOAD_SQL = """
+    private static final String LOAD_SQL = """
                 SELECT g.id AS genre_id, g.name AS genre_name
                 FROM film_genres fg
                 JOIN genres g ON fg.genre_id = g.id
@@ -107,7 +107,7 @@ public class FilmDbStorage implements FilmStorage {
                 ORDER BY g.id
                 """;
 
-    private final static String DELETE_SQL= "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
+    private static final String DELETE_SQL= "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
 
     private final JdbcTemplate jdbcTemplate;
 
